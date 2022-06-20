@@ -1,1 +1,1 @@
-# invest-ML-tools
+# Set of Machine Learning tools for trading purposes
