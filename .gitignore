@@ -129,6 +129,12 @@ dmypy.json
 .pyre/
 
 #My
-.idea/*
+*.idea*
+*/.idea/*
 TODO.txt
 *.pyc
+*.env
+*.venv
+*/env/
+*/venv/
+*/ENV/
