@@ -2,7 +2,7 @@ from configparser import ConfigParser
 
 __all__ = ("ProgramConfiguration")
 
-from configuration.settings import DataCollectionSettings, StockFigi
+from configuration.settings import DataCollectionSettings, StockFigi, StorageSettings
 
 
 class ProgramConfiguration:
@@ -34,6 +34,12 @@ class ProgramConfiguration:
                 )
             )
 
+        self.__storage_type_name = config["STORAGE"]["TYPE"]
+
+        self.__storage_settings = StorageSettings(
+            settings=dict(config["STORAGE_SETTINGS"])
+        )
+
     @property
     def tinkoff_token(self) -> str:
         return self.__tinkoff_token
@@ -49,3 +55,11 @@ class ProgramConfiguration:
     @property
     def download_figi(self) -> list[str]:
         return [stock.figi for stock in self.__stock_figies]
+
+    @property
+    def storage_type_name(self) -> str:
+        return self.__storage_type_name
+
+    @property
+    def storage_settings(self) -> StorageSettings:
+        return self.__storage_settings
