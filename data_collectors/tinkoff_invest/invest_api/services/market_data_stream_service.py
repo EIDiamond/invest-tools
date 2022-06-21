@@ -3,10 +3,13 @@ import logging
 from typing import Generator
 
 from tinkoff.invest import Client, CandleInstrument, SubscriptionInterval, InfoInstrument, TradeInstrument, \
-    MarketDataResponse, Candle, AsyncClient
+    MarketDataResponse, Candle, AsyncClient, LastPriceInstrument, OrderBookInstrument
 from tinkoff.invest.market_data_stream.async_market_data_stream_manager import AsyncMarketDataStreamManager
 from tinkoff.invest.market_data_stream.market_data_stream_interface import IMarketDataStreamManager
 from tinkoff.invest.market_data_stream.market_data_stream_manager import MarketDataStreamManager
+
+from configuration.settings import DataCollectionSettings
+
 
 __all__ = ("MarketDataStreamService")
 
@@ -23,7 +26,8 @@ class MarketDataStreamService:
 
     def market_data_stream(
             self,
-            figies: list[str]
+            figies: list[str],
+            settings: DataCollectionSettings
     ) -> Generator[MarketDataResponse, None, None]:
         """
         The method starts gRPC stream and return candles
@@ -33,31 +37,59 @@ class MarketDataStreamService:
         with Client(self.__token, app_name=self.__app_name) as client:
             market_data_candles_stream: MarketDataStreamManager = client.create_market_data_stream()
 
-            logger.info(f"Subscribe candles: {figies}")
-            market_data_candles_stream.candles.subscribe(
-                [
-                    CandleInstrument(
-                        figi=figi,
-                        interval=SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE
-                    )
-                    for figi in figies
-                ]
-            )
+            if settings.candles:
+                logger.info(f"Subscribe candles: {figies}")
+                market_data_candles_stream.candles.subscribe(
+                    [
+                        CandleInstrument(
+                            figi=figi,
+                            interval=SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE
+                        )
+                        for figi in figies
+                    ]
+                )
 
-            logger.info(f"Subscribe trades: {figies}")
-            market_data_candles_stream.trades.subscribe(
-                [
-                    TradeInstrument(
-                        figi=figi
-                    )
-                    for figi in figies
-                ]
-            )
+            if settings.trades:
+                logger.info(f"Subscribe trades: {figies}")
+                market_data_candles_stream.trades.subscribe(
+                    [
+                        TradeInstrument(
+                            figi=figi
+                        )
+                        for figi in figies
+                    ]
+                )
+
+            if settings.last_price:
+                logger.info(f"Subscribe last_price: {figies}")
+                market_data_candles_stream.last_price.subscribe(
+                    [
+                        LastPriceInstrument(
+                            figi=figi
+                        )
+                        for figi in figies
+                    ]
+                )
+
+            if settings.order_book:
+                logger.info(f"Subscribe order_book: {figies}")
+                market_data_candles_stream.order_book.subscribe(
+                    [
+                        OrderBookInstrument(
+                            figi=figi,
+                            depth=10
+                        )
+                        for figi in figies
+                    ]
+                )
 
             for market_data in market_data_candles_stream:
                 logger.debug(f"market_data: {market_data}")
 
-                if market_data.candle or market_data.trade:
+                if (settings.candles and market_data.candle) \
+                        or (settings.trades and market_data.trade) \
+                        or (settings.last_price and market_data.last_price) \
+                        or (settings.order_book and market_data.orderbook):
                     yield market_data
 
     @staticmethod

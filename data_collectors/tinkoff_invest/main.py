@@ -30,13 +30,19 @@ if __name__ == '__main__':
 
     logger.info("Data collector has been started")
 
-    config = ProgramConfiguration(CONFIG_FILE)
-    logger.info("Configuration has been loaded")
+    try:
+        config = ProgramConfiguration(CONFIG_FILE)
+        logger.info("Configuration has been loaded")
 
-    for marketdata in MarketDataStreamService(
-            config.tinkoff_token,
-            config.tinkoff_app_name
-    ).market_data_stream(config.download_figi):
-        logger.info(marketdata)
+        for marketdata in MarketDataStreamService(
+                config.tinkoff_token,
+                config.tinkoff_app_name
+        ).market_data_stream(
+            config.download_figi,
+            config.data_collection_settings
+        ):
+            logger.info(marketdata)
+    except Exception as ex:
+        logger.error(f"Error has been occurred: {repr(ex)}")
 
     logger.info("Data collector has been finished")

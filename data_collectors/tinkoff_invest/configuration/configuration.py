@@ -22,7 +22,6 @@ class ProgramConfiguration:
             candles=bool(int(config["DATA_COLLECTION"]["CANDLES"])),
             trades=bool(int(config["DATA_COLLECTION"]["TRADES"])),
             order_book=bool(int(config["DATA_COLLECTION"]["ORDER_BOOK"])),
-            info=bool(int(config["DATA_COLLECTION"]["INFO"])),
             last_price=bool(int(config["DATA_COLLECTION"]["LAST_PRICE"]))
         )
 
