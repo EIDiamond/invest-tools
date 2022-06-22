@@ -46,7 +46,7 @@ if __name__ == '__main__':
                 config.download_figi,
                 config.data_collection_settings
             ):
-                logger.info(marketdata)
+                data_storage.save(marketdata)
         else:
             logger.info(f"Storage hasn't been found by type name: {config.storage_type_name}")
 
