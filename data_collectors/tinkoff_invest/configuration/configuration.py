@@ -1,15 +1,14 @@
 from configparser import ConfigParser
 
-__all__ = ("ProgramConfiguration")
-
 from configuration.settings import DataCollectionSettings, StockFigi, StorageSettings
+
+__all__ = ("ProgramConfiguration")
 
 
 class ProgramConfiguration:
     """
     Represent collector configuration
     """
-
     def __init__(self, file_name: str) -> None:
         # classic ini file
         config = ConfigParser()

@@ -4,6 +4,7 @@ import os
 from logging.handlers import RotatingFileHandler
 
 from configuration.configuration import ProgramConfiguration
+from data_storage.storage_factory import StorageFactory
 from invest_api.services.market_data_stream_service import MarketDataStreamService
 
 
@@ -34,14 +35,21 @@ if __name__ == '__main__':
         config = ProgramConfiguration(CONFIG_FILE)
         logger.info("Configuration has been loaded")
 
-        for marketdata in MarketDataStreamService(
-                config.tinkoff_token,
-                config.tinkoff_app_name
-        ).market_data_stream(
-            config.download_figi,
-            config.data_collection_settings
-        ):
-            logger.info(marketdata)
+        logger.info("Load data storage by configuration")
+        data_storage = StorageFactory.new_factory(config.storage_type_name, config.storage_settings)
+
+        if data_storage:
+            for marketdata in MarketDataStreamService(
+                    config.tinkoff_token,
+                    config.tinkoff_app_name
+            ).market_data_stream(
+                config.download_figi,
+                config.data_collection_settings
+            ):
+                logger.info(marketdata)
+        else:
+            logger.info(f"Storage hasn't been found by type name: {config.storage_type_name}")
+
     except Exception as ex:
         logger.error(f"Error has been occurred: {repr(ex)}")
 
