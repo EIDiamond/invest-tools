@@ -71,7 +71,7 @@ You will have to add your own, if you add self storage class.
   - Put new settings into `STORAGE_SETTINGS` section
 
 ## Logging
-All logs are written in logs/robot.log.
+All logs are written in logs/collector.log.
 Any kind of settings can be changed in main.py code
 
 ## Disclaimer
