@@ -52,7 +52,7 @@ class CSVDataStorage(IStorage):
                 logger.debug(f"Nothing to save")
 
         except Exception as ex:
-            logger.error(f"Error write market data to file: {repr(ex)}")
+            logger.error(f"Error while write market data to file: {repr(ex)}")
 
     def __save_candle(self, candle: Candle) -> None:
         """
@@ -123,24 +123,24 @@ class CSVDataStorage(IStorage):
         current_dir = None
         for directory in directories:
             current_dir = CSVDataStorage.__check_or_mk_dir(
-                Path(current_dir, directory) if current_dir else Path(directory)
+                current_dir.joinpath(Path(directory)) if current_dir else Path(directory)
             )
 
-        return Path(current_dir, self.__FILE_NAME).name
+        return str(Path(current_dir, self.__FILE_NAME))
 
     @staticmethod
-    def __check_or_mk_dir(directory: Path) -> str:
+    def __check_or_mk_dir(directory: Path) -> Path:
         if not directory.exists():
-            logger.info(f"Directory doesn't exist: {directory.name}. Making...")
+            logger.info(f"Directory doesn't exist: {directory}. Making...")
             directory.mkdir()
 
-        return directory.name
+        return directory
 
     @staticmethod
     def __write_data_row(file_name: str, row: list) -> None:
         logger.debug(f"Write to file: {file_name}. Data: {row}")
 
-        with open(file_name, 'a', encoding='UTF8') as file:
+        with open(file_name, 'a', encoding='UTF8', newline="") as file:
             csv_writer = csv.writer(file)
 
             # write the data
@@ -150,7 +150,7 @@ class CSVDataStorage(IStorage):
     def __write_data_rows(file_name: str, rows: list[list]) -> None:
         logger.debug(f"Write to file: {file_name}. Data: {rows}")
 
-        with open(file_name, 'a', encoding='UTF8') as file:
+        with open(file_name, 'a', encoding='UTF8', newline="") as file:
             csv_writer = csv.writer(file)
 
             # write the data
