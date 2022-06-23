@@ -13,5 +13,5 @@ Main goal is download and keep this data for internal purposes.
 See more details in the tool [Readme](data_collectors/tinkoff_invest_stream_py/README.md)
 
 
-## Disclamer
+## Disclaimer
 The author is not responsible for any errors or omissions, or for the trade results obtained from the use of this tools. 
