@@ -4,10 +4,17 @@
 Main goal is download and keep market data for internal purposes, such as manual analyze, 
 historical backtesting, ML purposes etc.
 
-The tool is using [Tinkoff Invest Python gRPC client](https://github.com/Tinkoff/invest-python) api.
+The tool is using [Tinkoff Invest Python gRPC client](https://github.com/Tinkoff/invest-python) api and collecting data from MOEX Exchange.
 
-The tool is downloading market data via market stream in real-time. 
-So, you have to keep running the tool while trading session.  
+Please note:
+1. The tool is downloading market data via market stream in **real-time**. 
+So, you have to keep it running while trading session.   
+
+2. Moreover, you have to start it before start main trade session and stop after. 
+Sometimes, market stream can hang between trade sessions. 
+I strongly recommend keeping it running only while trade session.
+
+4. Also, market stream can hang while trade session. I'm going to add something to struggle with it. But only for trade session time.  
 
 
 ## Features
@@ -51,15 +58,19 @@ Specify what kind of data the tool will collect:
 
 Note: `ORDER_BOOK` is under construction as this moment.  
 ### Section STOCK_FIGI
-Specify stocks via figi.   
+Specify stocks via figi.
+
+Syntax:
+ticker_name=figi
+
 ### Section STORAGE
 Specify name of storage (class with storage logic).
 
-`TYPE=FILES_CSV` by default, but you are able to add your own. 
+`TYPE=FILES_CSV` by default, but you are able to add your own. (see below)
 
 ### Section STORAGE_SETTINGS
 Section for storage settings. 
-You will have to add your own, if you add self storage class.
+You will have to add your own, if you add your own storage class.
 
 ## How to add a new storage 
 - Write a new class with storage logic
@@ -69,6 +80,29 @@ You will have to add your own, if you add self storage class.
 - Specify new settings in settings.ini file. 
   - Put the new class name in `STORAGE` section and `TYPE` field
   - Put new settings into `STORAGE_SETTINGS` section
+
+## CSV files (default storage)
+### Structure on file system
+By default, root path is specified in `STORAGE_SETTINGS` section and `ROOT_PATH` field. 
+
+Folders structure: `ROOT_PATH`/{figi}/{data_type_folder}/{year}/{month}/{day}/market_data.csv
+
+{data_type_folder} can be:
+- "candle" (for candles)
+- "trade" (for executed orders)
+- "last_price" (for last price information)
+
+### CSV files structure
+#### Candles
+Headers in candles csv file: **open**, **close**, **high**, **low**, **volume**, **time**
+
+#### Trades
+Headers in trades csv file: **direction**, **price**, **quantity**, **time**
+
+Direction: 1 - Buy, 2 - sell
+
+#### Last Prices
+Headers in last_prices csv file: **price**, **time**
 
 ## Logging
 All logs are written in logs/collector.log.
