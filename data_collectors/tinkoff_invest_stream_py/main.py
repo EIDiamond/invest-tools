@@ -1,14 +1,11 @@
-import datetime
 import logging
 import os
-import time
 
 from logging.handlers import RotatingFileHandler
 
 from configuration.configuration import ProgramConfiguration
+from data_collector.tinkoff_collector import TinkoffCollector
 from data_storage.storage_factory import StorageFactory
-from invest_api.services.instrument_service import InstrumentService
-from invest_api.services.market_data_stream_service import MarketDataStreamService
 
 # the configuration file name
 CONFIG_FILE = "settings.ini"
@@ -28,16 +25,6 @@ def prepare_logs():
     )
 
 
-def sleep_to(next_time: datetime) -> None:
-    now = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
-
-    logger.debug(f"Sleep from {now} to {next_time}")
-    total_seconds = (next_time - now).total_seconds()
-
-    if total_seconds > 0:
-        time.sleep(total_seconds)
-
-
 if __name__ == '__main__':
     prepare_logs()
 
@@ -51,34 +38,11 @@ if __name__ == '__main__':
         data_storage = StorageFactory.new_factory(config.storage_type_name, config.storage_settings)
 
         if data_storage:
-            is_trading_day, start_time, end_time = InstrumentService(
-                config.tinkoff_token,
-                config.tinkoff_app_name
-            ).moex_today_trading_schedule()
+            logger.debug("Create data collector")
+            market_data_collector = TinkoffCollector(config.tinkoff_token, config.tinkoff_app_name, data_storage)
 
-            if is_trading_day and datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc) <= end_time:
-                logger.info(f"Today is trading day. Trading will start after {start_time}")
+            market_data_collector.collect(config.download_figi, config.data_collection_settings)
 
-                sleep_to(start_time)
-
-                logger.info(f"Trading day has been started")
-
-                for marketdata in MarketDataStreamService(
-                        config.tinkoff_token,
-                        config.tinkoff_app_name
-                ).market_data_stream(
-                    config.download_figi,
-                    config.data_collection_settings
-                ):
-                    data_storage.save(marketdata)
-
-            else:
-                logger.info("Nothing collect today")
-
-                if is_trading_day:
-                    logger.info("Trade session was over")
-                else:
-                    logger.info("Today is not trading day")
         else:
             logger.info(f"Storage hasn't been found by type name: {config.storage_type_name}")
 
