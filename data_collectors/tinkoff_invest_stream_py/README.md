@@ -14,8 +14,9 @@ So, you have to keep it running while trading session.
 Sometimes, market stream can hang between trade sessions. 
 I strongly recommend keeping it running only while trade session.
 
-4. Also, market stream can hang while trade session. I'm going to add something to struggle with it. But only for trade session time.  
+3. If you start the tool before start trading session, the tool will wait till start. But you still have to stop it manually.
 
+4. Also, market stream can hang while trade session. I'm going to add something to struggle with it. But only for trade session time.  
 
 ## Features
 - Downloading the following information from MOEX Exchange:
