@@ -8,7 +8,7 @@ from tinkoff.invest.market_data_stream.async_market_data_stream_manager import A
 from tinkoff.invest.market_data_stream.market_data_stream_interface import IMarketDataStreamManager
 from tinkoff.invest.market_data_stream.market_data_stream_manager import MarketDataStreamManager
 
-from invest_api.invest_error_decorators import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging, invest_api_retry
 
 from configuration.settings import DataCollectionSettings
 
@@ -26,6 +26,7 @@ class MarketDataStreamService:
         self.__token = token
         self.__app_name = app_name
 
+    @invest_api_retry()
     @invest_error_logging
     def market_data_stream(
             self,

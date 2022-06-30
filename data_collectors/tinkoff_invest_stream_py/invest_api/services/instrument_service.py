@@ -3,7 +3,7 @@ import logging
 
 from tinkoff.invest import Client, TradingSchedule, InstrumentIdType, InstrumentStatus
 
-from invest_api.invest_error_decorators import invest_error_logging
+from invest_api.invest_error_decorators import invest_error_logging, invest_api_retry
 
 __all__ = ("InstrumentService")
 
@@ -37,6 +37,7 @@ class InstrumentService:
 
         return False, datetime.datetime.utcnow(), datetime.datetime.utcnow()
 
+    @invest_api_retry()
     @invest_error_logging
     def __trading_schedules(
             self,
