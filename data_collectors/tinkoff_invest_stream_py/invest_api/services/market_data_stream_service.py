@@ -2,7 +2,7 @@ import logging
 from typing import Generator
 
 from tinkoff.invest import Client, CandleInstrument, SubscriptionInterval, TradeInstrument, \
-    MarketDataResponse, LastPriceInstrument, OrderBookInstrument
+    MarketDataResponse, LastPriceInstrument
 from tinkoff.invest.market_data_stream.market_data_stream_interface import IMarketDataStreamManager
 from tinkoff.invest.market_data_stream.market_data_stream_manager import MarketDataStreamManager
 
