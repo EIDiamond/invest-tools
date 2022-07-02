@@ -57,7 +57,6 @@ Specify what kind of data the tool will collect:
 - 1 - True
 - 0 - False
 
-Note: `ORDER_BOOK` is under construction as this moment.  
 ### Section STOCK_FIGI
 Specify stocks via figi.
 

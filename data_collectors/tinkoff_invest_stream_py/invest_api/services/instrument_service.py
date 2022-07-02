@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-from tinkoff.invest import Client, TradingSchedule, InstrumentIdType, InstrumentStatus
+from tinkoff.invest import Client, TradingSchedule
 
 from invest_api.invest_error_decorators import invest_error_logging, invest_api_retry
 

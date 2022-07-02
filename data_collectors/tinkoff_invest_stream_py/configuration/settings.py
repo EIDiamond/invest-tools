@@ -7,7 +7,6 @@ __all__ = ("DataCollectionSettings", "StockFigi", "StorageSettings")
 class DataCollectionSettings:
     candles: bool = False
     trades: bool = False
-    order_book: bool = False
     last_price: bool = False
 
 

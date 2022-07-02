@@ -1,10 +1,8 @@
-import datetime
 import logging
 from typing import Generator
 
-from tinkoff.invest import Client, CandleInstrument, SubscriptionInterval, InfoInstrument, TradeInstrument, \
-    MarketDataResponse, Candle, AsyncClient, LastPriceInstrument, OrderBookInstrument
-from tinkoff.invest.market_data_stream.async_market_data_stream_manager import AsyncMarketDataStreamManager
+from tinkoff.invest import Client, CandleInstrument, SubscriptionInterval, TradeInstrument, \
+    MarketDataResponse, LastPriceInstrument, OrderBookInstrument
 from tinkoff.invest.market_data_stream.market_data_stream_interface import IMarketDataStreamManager
 from tinkoff.invest.market_data_stream.market_data_stream_manager import MarketDataStreamManager
 
@@ -75,25 +73,12 @@ class MarketDataStreamService:
                     ]
                 )
 
-            if settings.order_book:
-                logger.info(f"Subscribe order_book: {figies}")
-                market_data_candles_stream.order_book.subscribe(
-                    [
-                        OrderBookInstrument(
-                            figi=figi,
-                            depth=10
-                        )
-                        for figi in figies
-                    ]
-                )
-
             for market_data in market_data_candles_stream:
                 logger.debug(f"market_data: {market_data}")
 
                 if (settings.candles and market_data.candle) \
                         or (settings.trades and market_data.trade) \
-                        or (settings.last_price and market_data.last_price) \
-                        or (settings.order_book and market_data.orderbook):
+                        or (settings.last_price and market_data.last_price):
                     yield market_data
 
     @staticmethod

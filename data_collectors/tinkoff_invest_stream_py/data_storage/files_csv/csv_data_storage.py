@@ -20,7 +20,6 @@ class CSVDataStorage(IStorage):
 
     __CANDLE_TYPE_FOLDER = "candle"
     __TRADE_TYPE_FOLDER = "trade"
-    __ORDERBOOK_TYPE_FOLDER = "order_book"
     __LAST_PRICE_TYPE_FOLDER = "last_price"
 
     # Consts to read and parse dict with configuration
@@ -44,8 +43,6 @@ class CSVDataStorage(IStorage):
                 self.__save_candle(market_data.candle)
             elif market_data.trade:
                 self.__save_trade(market_data.trade)
-            elif market_data.orderbook:
-                pass
             elif market_data.last_price:
                 self.__save_last_price(market_data.last_price)
             else:
