@@ -1,6 +1,6 @@
 from configparser import ConfigParser
 
-from configuration.settings import DataCollectionSettings, StockFigi, StorageSettings
+from configuration.settings import DataCollectionSettings, StockFigi, StorageSettings, WatcherSettings
 
 __all__ = ("ProgramConfiguration")
 
@@ -21,6 +21,10 @@ class ProgramConfiguration:
             candles=bool(int(config["DATA_COLLECTION"]["CANDLES"])),
             trades=bool(int(config["DATA_COLLECTION"]["TRADES"])),
             last_price=bool(int(config["DATA_COLLECTION"]["LAST_PRICE"]))
+        )
+
+        self.__watcher_settings = WatcherSettings(
+            max_sec_api_silence=int(config["WATCHER"]["MAX_SEC_API_SILENCE"])
         )
 
         self.__stock_figies: list[StockFigi] = []
@@ -49,6 +53,10 @@ class ProgramConfiguration:
     @property
     def data_collection_settings(self) -> DataCollectionSettings:
         return self.__data_collection_settings
+
+    @property
+    def watcher_settings(self) -> WatcherSettings:
+        return self.__watcher_settings
 
     @property
     def download_figi(self) -> list[str]:

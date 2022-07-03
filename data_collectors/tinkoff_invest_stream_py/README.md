@@ -8,15 +8,11 @@ The tool is using [Tinkoff Invest Python gRPC client](https://github.com/Tinkoff
 
 Please note:
 1. The tool is downloading market data via market stream in **real-time**. 
-So, you have to keep it running while trading session.   
+Note: You have to keep it running to have whole trade day information.  
 
-2. Moreover, you have to start it before start main trade session and stop after. 
-Sometimes, market stream can hang between trade sessions. 
-I strongly recommend keeping it running only while trade session.
-
-3. If you start the tool before start trading session, the tool will wait till start. But you still have to stop it manually.
-
-4. Also, market stream can hang while trade session. I'm going to add something to struggle with it. But only for trade session time.  
+2. The tool workflow is "run and forgot". The tool reads trade schedule:
+   1. runs and stops data collection by schedule without manual handle it
+   2. also, handles holiday, weekends, sleep between trade days etc.
 
 ## Features
 - Downloading the following information from MOEX Exchange:
@@ -24,6 +20,7 @@ I strongly recommend keeping it running only while trade session.
   - Trades (executed orders)
   - Last price (price in time) 
 - Saving this data in csv files
+- Working as service. Just run it and forget. 
 
 ## Before Start
 ### Dependencies
@@ -50,6 +47,8 @@ Run main.py
 
 ## Configuration
 Configuration can be specified via [settings.ini](settings.ini) file.
+### Section WATCHER
+Specify `MAX_SEC_API_SILENCE` max delay between check for api hung.  
 ### Section INVEST_API
 Specify `TOKEN` and `APP_NAME` for [Тинькофф Инвестиции](https://www.tinkoff.ru/invest/) api.
 ### Section DATA_COLLECTION

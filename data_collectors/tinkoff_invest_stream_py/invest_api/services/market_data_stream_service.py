@@ -1,10 +1,9 @@
 import logging
 from typing import Generator
 
-from tinkoff.invest import Client, CandleInstrument, SubscriptionInterval, TradeInstrument, \
+from tinkoff.invest import AsyncClient, CandleInstrument, SubscriptionInterval, TradeInstrument, \
     MarketDataResponse, LastPriceInstrument
-from tinkoff.invest.market_data_stream.market_data_stream_interface import IMarketDataStreamManager
-from tinkoff.invest.market_data_stream.market_data_stream_manager import MarketDataStreamManager
+from tinkoff.invest.market_data_stream.async_market_data_stream_manager import AsyncMarketDataStreamManager
 
 from invest_api.invest_error_decorators import invest_error_logging, invest_api_retry
 
@@ -24,24 +23,26 @@ class MarketDataStreamService:
         self.__token = token
         self.__app_name = app_name
 
+        self.__stream: AsyncMarketDataStreamManager = None
+
     @invest_api_retry()
     @invest_error_logging
-    def market_data_stream(
+    async def start_async_candles_stream(
             self,
             figies: list[str],
             settings: DataCollectionSettings
     ) -> Generator[MarketDataResponse, None, None]:
         """
-        The method starts gRPC stream and return candles
+        The method starts async gRPC stream and return required responses
         """
-        logger.debug(f"Starting market data stream")
+        logger.debug(f"Starting market data async stream")
 
-        with Client(self.__token, app_name=self.__app_name) as client:
-            market_data_candles_stream: MarketDataStreamManager = client.create_market_data_stream()
+        async with AsyncClient(self.__token, app_name=self.__app_name) as client:
+            self.__stream = client.create_market_data_stream()
 
             if settings.candles:
                 logger.info(f"Subscribe candles: {figies}")
-                market_data_candles_stream.candles.subscribe(
+                self.__stream.candles.subscribe(
                     [
                         CandleInstrument(
                             figi=figi,
@@ -53,7 +54,7 @@ class MarketDataStreamService:
 
             if settings.trades:
                 logger.info(f"Subscribe trades: {figies}")
-                market_data_candles_stream.trades.subscribe(
+                self.__stream.trades.subscribe(
                     [
                         TradeInstrument(
                             figi=figi
@@ -64,7 +65,7 @@ class MarketDataStreamService:
 
             if settings.last_price:
                 logger.info(f"Subscribe last_price: {figies}")
-                market_data_candles_stream.last_price.subscribe(
+                self.__stream.last_price.subscribe(
                     [
                         LastPriceInstrument(
                             figi=figi
@@ -73,7 +74,7 @@ class MarketDataStreamService:
                     ]
                 )
 
-            for market_data in market_data_candles_stream:
+            async for market_data in self.__stream:
                 logger.debug(f"market_data: {market_data}")
 
                 if (settings.candles and market_data.candle) \
@@ -81,8 +82,8 @@ class MarketDataStreamService:
                         or (settings.last_price and market_data.last_price):
                     yield market_data
 
-    @staticmethod
-    def __stop_candles_stream(stream: IMarketDataStreamManager) -> None:
-        if stream:
+    def stop_candles_stream(self) -> None:
+        if self.__stream:
             logger.info(f"Stopping candles stream")
-            stream.stop()
+
+            self.__stream.stop()
