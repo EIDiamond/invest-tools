@@ -26,3 +26,4 @@ class StorageSettings:
 @dataclass(eq=False, repr=True)
 class WatcherSettings:
     max_sec_api_silence: int
+    delay_between_api_errors_sec: int

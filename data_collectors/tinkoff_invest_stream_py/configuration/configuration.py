@@ -24,7 +24,8 @@ class ProgramConfiguration:
         )
 
         self.__watcher_settings = WatcherSettings(
-            max_sec_api_silence=int(config["WATCHER"]["MAX_SEC_API_SILENCE"])
+            max_sec_api_silence=int(config["WATCHER"]["MAX_SEC_API_SILENCE"]),
+            delay_between_api_errors_sec=int(config["WATCHER"]["DELAY_BETWEEN_API_ERRORS_SEC"])
         )
 
         self.__stock_figies: list[StockFigi] = []

@@ -1,5 +1,6 @@
 import logging
 
+from grpc.aio import AioRpcError
 from tinkoff.invest import InvestError, RequestError, AioRequestError
 
 logger = logging.getLogger(__name__)
@@ -28,7 +29,7 @@ def invest_error_logging(func):
 
 
 # Decorator retries api requests for some kind of exceptions
-def invest_api_retry(retry_count: int = 3, exceptions: tuple = ( RequestError )):
+def invest_api_retry(retry_count: int = 3, exceptions: tuple = (RequestError, AioRpcError, AioRequestError)):
     def errors_retry(func):
 
         def errors_wrapper(*args, **kwargs):

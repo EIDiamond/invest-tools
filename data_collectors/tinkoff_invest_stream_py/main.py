@@ -65,7 +65,8 @@ if __name__ == '__main__':
                 data_storage,
                 market_data_service,
                 config.download_figi,
-                config.data_collection_settings
+                config.data_collection_settings,
+                config.watcher_settings.delay_between_api_errors_sec
             )
 
             observer = Observer(config.watcher_settings, market_data_collector)

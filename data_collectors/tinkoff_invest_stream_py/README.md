@@ -12,7 +12,7 @@ Note: You have to keep it running to have whole trade day information.
 
 2. The tool workflow is "run and forgot". The tool reads trade schedule:
    1. runs and stops data collection by schedule without manual handle it
-   2. also, handles holiday, weekends, sleep between trade days etc.
+   2. handles holiday, weekends, also sleep between trade days etc.
 
 ## Features
 - Downloading the following information from MOEX Exchange:
@@ -49,6 +49,7 @@ Run main.py
 Configuration can be specified via [settings.ini](settings.ini) file.
 ### Section WATCHER
 Specify `MAX_SEC_API_SILENCE` max delay between check for api hung.  
+Specify `DELAY_BETWEEN_API_ERRORS_SEC` max delay between retry runs if api has been failed.  
 ### Section INVEST_API
 Specify `TOKEN` and `APP_NAME` for [Тинькофф Инвестиции](https://www.tinkoff.ru/invest/) api.
 ### Section DATA_COLLECTION

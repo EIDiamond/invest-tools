@@ -19,6 +19,7 @@ class TinkoffCollector(IObservableDataCollector):
     """
     The class encapsulate market data collection process
     """
+
     def __init__(
             self,
             token: str,
@@ -26,7 +27,8 @@ class TinkoffCollector(IObservableDataCollector):
             storage: IStorage,
             market_data_stream_service: MarketDataStreamService,
             download_figi: list[str],
-            data_collection_settings: DataCollectionSettings
+            data_collection_settings: DataCollectionSettings,
+            api_errors_delay: int
     ) -> None:
         self.__token = token
         self.__app_name = app_name
@@ -41,6 +43,8 @@ class TinkoffCollector(IObservableDataCollector):
         self.__download_figi = download_figi
         self.__data_collection_settings = data_collection_settings
 
+        self.__api_errors_delay = api_errors_delay
+
     async def worker(self) -> None:
         logger.info("Start every day data collecting")
 
@@ -53,7 +57,7 @@ class TinkoffCollector(IObservableDataCollector):
                     self.__app_name
                 ).moex_today_trading_schedule()
                 # for tests purposes
-                #is_trading_day, start_time, end_time = \
+                # is_trading_day, start_time, end_time = \
                 #    True, \
                 #    datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc) + datetime.timedelta(seconds=5), \
                 #    datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc) + datetime.timedelta(minutes=1)
@@ -64,7 +68,12 @@ class TinkoffCollector(IObservableDataCollector):
                     await TinkoffCollector.__sleep_to(start_time)
 
                     while datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc) < end_time:
-                        await self.__collect_data()
+                        try:
+                            await self.__collect_data()
+                        except Exception as ex:
+                            logger.info(f"Collect error: {repr(ex)}")
+                            logger.info(f"Try again after {self.__api_errors_delay} seconds")
+                            await asyncio.sleep(self.__api_errors_delay)
 
                 else:
                     logger.info("Nothing to collect today")
@@ -84,37 +93,42 @@ class TinkoffCollector(IObservableDataCollector):
 
         self.__update_collection_status(True)
 
-        async for marketdata in self.__market_data_stream_service.start_async_candles_stream(
-                self.__download_figi,
-                self.__data_collection_settings
-        ):
-            self.__update_last_event(marketdata)
-            self.__storage.save(marketdata)
-
-        self.__update_collection_status(False)
+        try:
+            async for marketdata in self.__market_data_stream_service.start_async_candles_stream(
+                    self.__download_figi,
+                    self.__data_collection_settings
+            ):
+                self.__update_last_event(marketdata)
+                self.__storage.save(marketdata)
+        finally:
+            self.__update_collection_status(False)
 
         logger.info(f"Trading day has been finished")
 
     def __update_last_event(self, market_data: MarketDataResponse) -> None:
         if market_data.candle:
-            self.__last_event = market_data.candle.time
+            if (not self.__last_event) or self.__last_event < market_data.candle.time:
+                self.__last_event = market_data.candle.time
         elif market_data.trade:
-            self.__last_event = market_data.trade.time
+            if (not self.__last_event) or self.__last_event < market_data.trade.time:
+                self.__last_event = market_data.trade.time
         elif market_data.last_price:
-            self.__last_event = market_data.last_price.time
+            if (not self.__last_event) or self.__last_event < market_data.last_price.time:
+                self.__last_event = market_data.last_price.time
 
     def last_event_time(self) -> datetime:
         return self.__last_event
 
     def __update_collection_status(self, status: bool) -> None:
         self.__collections_progress = status
+        self.__last_event = None
 
     def is_collection_in_progress(self) -> bool:
         return self.__collections_progress
 
     def restart(self) -> None:
         if self.is_collection_in_progress():
-            logger.info(f"Restart required. Stop stream. ")
+            logger.info(f"Restart required. Stopping stream. ")
             self.__market_data_stream_service.stop_candles_stream()
 
     @staticmethod
