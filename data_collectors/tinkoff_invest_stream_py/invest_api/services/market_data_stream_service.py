@@ -6,7 +6,6 @@ from tinkoff.invest import AsyncClient, CandleInstrument, SubscriptionInterval, 
 from tinkoff.invest.market_data_stream.async_market_data_stream_manager import AsyncMarketDataStreamManager
 
 from invest_api.invest_error_decorators import invest_error_logging, invest_api_retry
-
 from configuration.settings import DataCollectionSettings
 
 

@@ -4,7 +4,6 @@ import os
 import sys
 
 from logging.handlers import RotatingFileHandler
-
 from configuration.configuration import ProgramConfiguration
 from data_collector.tinkoff_collector import TinkoffCollector
 from data_storage.storage_factory import StorageFactory
