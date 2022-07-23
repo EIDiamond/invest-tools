@@ -1,3 +1,4 @@
+from decimal import Decimal
 from dataclasses import dataclass, field
 
 __all__ = ("StrategySettings")
@@ -14,3 +15,8 @@ class StrategySettings:
     settings: dict = field(default_factory=dict)
     lot_size: int = 1
     short_enabled_flag: bool = True
+
+
+@dataclass(eq=False, repr=True)
+class CommissionSettings:
+    every_order: Decimal = field(default_factory=Decimal)

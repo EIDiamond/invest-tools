@@ -1,6 +1,7 @@
 from configparser import ConfigParser
+from decimal import Decimal
 
-from configuration.settings import StrategySettings
+from configuration.settings import StrategySettings, CommissionSettings
 
 __all__ = ("ProgramConfiguration")
 
@@ -13,6 +14,10 @@ class ProgramConfiguration:
         # classic ini file
         config = ConfigParser()
         config.read(file_name)
+
+        self.__commission_settings = CommissionSettings(
+            every_order=Decimal(config["COMMISSION"]["EVERY_ORDER_PERCENT"])
+        )
 
         self.__tinkoff_token = config["INVEST_API"]["TOKEN"]
         self.__tinkoff_app_name = config["INVEST_API"]["APP_NAME"]
@@ -37,3 +42,7 @@ class ProgramConfiguration:
     @property
     def test_strategy_settings(self) -> StrategySettings:
         return self.__test_strategy_settings
+
+    @property
+    def commission_settings(self) -> CommissionSettings:
+        return self.__commission_settings

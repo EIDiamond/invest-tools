@@ -6,6 +6,7 @@ from tinkoff.invest import CandleInterval
 from history_tests.strategy_tester import StrategyTester
 from history_tests.test_results import TestResults
 from invest_api.services.client_service import ClientService
+from trade_system.commissions import CommissionCalculator
 from trade_system.signal import SignalType
 from trade_system.strategies.base_strategy import IStrategy
 
@@ -19,8 +20,9 @@ class HistoryTestsManager:
     The manager for testing strategy on historical candles
     """
 
-    def __init__(self, client_service: ClientService) -> None:
+    def __init__(self, client_service: ClientService, commission_calculator: CommissionCalculator) -> None:
         self.__client_service = client_service
+        self.__commission_calculator = commission_calculator
 
     def start(
             self,
@@ -46,12 +48,11 @@ class HistoryTestsManager:
         test_results = StrategyTester(strategy).test(candles)
 
         # Show all results to log file
-        HistoryTestsManager.__log_test_results(test_results)
+        self.__log_test_results(test_results)
 
         logger.info("End strategy tests")
 
-    @staticmethod
-    def __log_test_results(test_results: TestResults) -> None:
+    def __log_test_results(self, test_results: TestResults) -> None:
         """
         Just print results to log file
         """
@@ -63,10 +64,18 @@ class HistoryTestsManager:
         logger.info(f"Stop Loss: {len(test_results.get_stop_loss_positions())}")
 
         profit = Decimal(0)
+        total_commission = Decimal(0)
+
         for test_order in test_results.executed_orders:
             logger.info(f"Executed order. {test_order.signal}.")
             logger.info(f"Order profit result: {test_order.is_take_profit()}.")
             logger.info(f"Open: {test_order.open_level}; Close: {test_order.close_level}")
+
+            commission = self.__commission_calculator.calculate(test_order.open_level) + \
+                         self.__commission_calculator.calculate(test_order.open_level)
+            total_commission += commission
+            logger.info(f"Commission: {commission}")
+
             if test_order.signal.signal_type == SignalType.LONG:
                 # long profit if close > open
                 profit = profit + test_order.close_level - test_order.open_level
@@ -74,4 +83,6 @@ class HistoryTestsManager:
                 # short profit if open > close
                 profit = profit + test_order.open_level - test_order.close_level
 
-        logger.info(f"Test Profit: {profit}")
+        logger.info(f"Trade order profit: {profit}")
+        logger.info(f"Total commission: {total_commission}")
+        logger.info(f"Trade summary: {profit - total_commission}")
