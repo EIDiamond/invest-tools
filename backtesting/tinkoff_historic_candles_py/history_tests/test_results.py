@@ -46,9 +46,6 @@ class TestResults:
     def get_stop_loss_positions(self) -> list[TestPosition]:
         return list(filter(lambda x: x.is_stop_loss(), self.__executed_orders))
 
-    def get_opened_positions(self) -> list[TestPosition]:
-        return list(filter(lambda x: x.is_opened(), self.__executed_orders))
-
     def __execute_current_position(self) -> None:
         self.__executed_orders.append(self.__current_position)
         self.__current_position = None

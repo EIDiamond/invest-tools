@@ -1,10 +1,12 @@
 import logging
+from decimal import Decimal
 
 from tinkoff.invest import CandleInterval
 
 from history_tests.strategy_tester import StrategyTester
 from history_tests.test_results import TestResults
 from invest_api.services.client_service import ClientService
+from trade_system.signal import SignalType
 from trade_system.strategies.base_strategy import IStrategy
 
 __all__ = ("HistoryTestsManager")
@@ -57,6 +59,19 @@ class HistoryTestsManager:
 
         logger.info(f"Current Signal: {test_results.current_position}")
         logger.info(f"Signals executed: {len(test_results.executed_orders)}")
-        logger.info(f"Proposed Signals: {len(test_results.get_opened_positions())}")
         logger.info(f"Take Profit: {len(test_results.get_take_profit_positions())}")
         logger.info(f"Stop Loss: {len(test_results.get_stop_loss_positions())}")
+
+        profit = Decimal(0)
+        for test_order in test_results.executed_orders:
+            logger.info(f"Executed order. {test_order.signal}.")
+            logger.info(f"Order profit result: {test_order.is_take_profit()}.")
+            logger.info(f"Open: {test_order.open_level}; Close: {test_order.close_level}")
+            if test_order.signal.signal_type == SignalType.LONG:
+                # long profit if close > open
+                profit = profit + test_order.close_level - test_order.open_level
+            else:
+                # short profit if open > close
+                profit = profit + test_order.open_level - test_order.close_level
+
+        logger.info(f"Test Profit: {profit}")
