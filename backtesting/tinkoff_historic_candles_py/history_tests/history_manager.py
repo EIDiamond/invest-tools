@@ -44,7 +44,7 @@ class HistoryTestsManager:
         test_results = StrategyTester(strategy).test(candles)
 
         # Show all results to log file
-        self.__log_test_results(test_results)
+        HistoryTestsManager.__log_test_results(test_results)
 
         logger.info("End strategy tests")
 
@@ -55,9 +55,8 @@ class HistoryTestsManager:
         """
         logger.info("Test Results:")
 
-        logger.info(f"Signals found: {len(test_results.signals_statuses)}")
-        logger.info(f"Proposed Signals: {len(test_results.get_proposed_signals())}")
-        logger.info(f"Active Signals: {len(test_results.get_active_signals())}")
-        logger.info(f"Take Profit: {len(test_results.get_take_profit_signals())}")
-        logger.info(f"Stop Loss: {len(test_results.get_stop_loss_signals())}")
-        logger.info(f"Canceled: {len(test_results.get_canceled_signals())}")
+        logger.info(f"Current Signal: {test_results.current_position}")
+        logger.info(f"Signals executed: {len(test_results.executed_orders)}")
+        logger.info(f"Proposed Signals: {len(test_results.get_opened_positions())}")
+        logger.info(f"Take Profit: {len(test_results.get_take_profit_positions())}")
+        logger.info(f"Stop Loss: {len(test_results.get_stop_loss_positions())}")

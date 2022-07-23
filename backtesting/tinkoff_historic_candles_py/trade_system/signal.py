@@ -3,7 +3,7 @@ import logging
 from dataclasses import dataclass, field
 from decimal import Decimal
 
-__all__ = ("Signal", "SignalType", "SignalStatus", "SignalStatusResult")
+__all__ = ("Signal", "SignalType", "TestPosition", "PositionStatus")
 
 logger = logging.getLogger(__name__)
 
@@ -17,53 +17,50 @@ class SignalType(enum.IntEnum):
 @dataclass(frozen=True, eq=False, repr=True)
 class Signal:
     figi: str = ""
-    signal_type: SignalType = 0
+    signal_type: SignalType = SignalType.LONG
     take_profit_level: Decimal = field(default_factory=Decimal)
     stop_loss_level: Decimal = field(default_factory=Decimal)
 
 
 @enum.unique
-class SignalStatusResult(enum.IntEnum):
-    PROPOSED = 0
-    ACTIVE = 1
-    PROFIT = 2
-    LOSS = 3
-    CANCELED = 4
+class PositionStatus(enum.IntEnum):
+    OPEN = 0
+    PROFIT = 1
+    LOSS = 2
 
 
-class SignalStatus:
-    def __init__(self, signal: Signal) -> None:
+class TestPosition:
+    def __init__(self, signal: Signal, open_level: Decimal) -> None:
         self.__signal = signal
-        self.__result = SignalStatusResult.PROPOSED
+        self.__status = PositionStatus.OPEN
+        self.__open_level = open_level
+        self.__close_level = Decimal(0)
 
     @property
     def signal(self) -> Signal:
         return self.__signal
 
-    def order_activated(self) -> None:
-        self.__result = SignalStatusResult.ACTIVE
+    @property
+    def open_level(self) -> Decimal:
+        return self.__open_level
 
-    def stop_loss_executed(self) -> None:
-        self.__result = SignalStatusResult.LOSS
+    @property
+    def close_level(self) -> Decimal:
+        return self.__close_level
 
-    def take_profit_executed(self) -> None:
-        self.__result = SignalStatusResult.PROFIT
+    def stop_loss_executed(self, close_level: Decimal) -> None:
+        self.__status = PositionStatus.LOSS
+        self.__close_level = close_level
 
-    def cancel_executed(self) -> None:
-        self.__result = SignalStatusResult.CANCELED
+    def take_profit_executed(self, close_level: Decimal) -> None:
+        self.__status = PositionStatus.PROFIT
+        self.__close_level = close_level
 
-    def is_proposed(self) -> bool:
-        return self.__result == SignalStatusResult.PROPOSED
-
-    def is_active(self) -> bool:
-        return self.__result == SignalStatusResult.ACTIVE
+    def is_opened(self) -> bool:
+        return self.__status == PositionStatus.OPEN
 
     def is_take_profit(self) -> bool:
-        return self.__result == SignalStatusResult.PROFIT
+        return self.__status == PositionStatus.PROFIT
 
     def is_stop_loss(self) -> bool:
-        return self.__result == SignalStatusResult.LOSS
-
-    def is_canceled(self) -> bool:
-        return self.__result == SignalStatusResult.CANCELED
-
+        return self.__status == PositionStatus.LOSS

@@ -30,25 +30,26 @@ class StrategyTester:
 
         for candle in candles:
             # Check price from candle for take or stop price level
-            for signal_status in test_result.get_proposed_signals():
+            if test_result.current_position:
                 high = quotation_to_decimal(candle.high)
                 low = quotation_to_decimal(candle.low)
 
                 # Logic is:
                 # if stop or take price level is between high and low, then stop or take will be executed
-                if low <= signal_status.signal.stop_loss_level <= high:
-                    signal_status.stop_loss_executed()
-
+                # candle.close is the nearest price level to emulate price of closed position
+                if low <= test_result.current_position.signal.stop_loss_level <= high:
                     logger.info("Test STOP LOSS executed")
                     logger.info(f"CANDLE: {candle}")
-                    logger.info(f"Signal: {signal_status.signal}")
+                    logger.info(f"Signal: {test_result.current_position.signal}")
 
-                elif low <= signal_status.signal.take_profit_level <= high:
-                    signal_status.take_profit_executed()
+                    test_result.close_position_stop_loss(quotation_to_decimal(candle.close))
 
+                elif low <= test_result.current_position.signal.take_profit_level <= high:
                     logger.info("Test TAKE PROFIT executed")
                     logger.info(f"CANDLE: {candle}")
-                    logger.info(f"Signal: {signal_status.signal}")
+                    logger.info(f"Signal: {test_result.current_position.signal}")
+
+                    test_result.close_position_take_profit(quotation_to_decimal(candle.close))
 
             test_candles_pack.append(candle)
 
@@ -59,10 +60,11 @@ class StrategyTester:
                 if signal:
                     logger.info(f"New Signal: {signal}")
 
-                    if test_result.get_proposed_signals():
+                    if test_result.current_position:
                         logger.info("Signal skipped. Old still alive")
                     else:
-                        test_result.add_signal(signal)
+                        # candle.close is the nearest price level to emulate price of open position
+                        test_result.open_position(signal, quotation_to_decimal(candle.close))
 
         logger.info(f"Tests completed")
 
