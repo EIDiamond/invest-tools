@@ -47,20 +47,13 @@ class ChangeAndVolumeStrategy(IStrategy):
     def settings(self) -> StrategySettings:
         return self.__settings
 
-    def update_lot_count(self, lot: int) -> None:
-        self.__settings.lot_size = lot
-
-    def update_short_status(self, status: bool) -> None:
-        self.__settings.short_enabled_flag = status
-
-    def analyze_candles(self, candles: list[HistoricCandle]) -> Signal:
+    def analyze_candle(self, candle: HistoricCandle) -> Signal:
         """
-        The method analyzes candles and returns his decision.
+        The method analyzes candle and returns a decision.
         """
-        logger.debug(f"Start analyze candles for {self.settings.figi} strategy {__name__}. "
-                     f"Candles count: {len(candles)}")
+        logger.debug(f"Start analyze candle for {self.settings.figi} strategy {__name__}. {candle} ")
 
-        if not self.__update_recent_candles(candles):
+        if not self.__update_recent_candles(candle):
             return None
 
         if self.__is_match_long():
@@ -73,8 +66,8 @@ class ChangeAndVolumeStrategy(IStrategy):
 
         return None
 
-    def __update_recent_candles(self, candles: list[HistoricCandle]) -> bool:
-        self.__recent_candles.extend(candles)
+    def __update_recent_candles(self, candle: HistoricCandle) -> bool:
+        self.__recent_candles.append(candle)
 
         if len(self.__recent_candles) < self.__signal_min_candles:
             logger.debug(f"Candles in cache are low than required")

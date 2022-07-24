@@ -20,13 +20,11 @@ class StrategyTester:
 
     def test(
             self,
-            candles: list[HistoricCandle],
-            portion: int = 1
+            candles: list[HistoricCandle]
     ) -> TestResults:
-        logger.info(f"Start test: {self.__strategy}, portion {portion}, candles count: {len(candles)}")
+        logger.info(f"Start test: {self.__strategy}, candles count: {len(candles)}")
 
         test_result = TestResults()
-        test_candles_pack = []
 
         for candle in candles:
             # Check price from candle for take or stop price level
@@ -51,20 +49,16 @@ class StrategyTester:
 
                     test_result.close_position_take_profit(quotation_to_decimal(candle.close))
 
-            test_candles_pack.append(candle)
+            signal = self.__strategy.analyze_candle(candle)
 
-            if len(test_candles_pack) >= portion:
-                signal = self.__strategy.analyze_candles(test_candles_pack)
-                test_candles_pack = []
+            if signal:
+                logger.info(f"New Signal: {signal}")
 
-                if signal:
-                    logger.info(f"New Signal: {signal}")
-
-                    if test_result.current_position:
-                        logger.info("Signal skipped. Old still alive")
-                    else:
-                        # candle.close is the nearest price level to emulate price of open position
-                        test_result.open_position(signal, quotation_to_decimal(candle.close))
+                if test_result.current_position:
+                    logger.info("Signal skipped. Old still alive")
+                else:
+                    # candle.close is the nearest price level to emulate price of open position
+                    test_result.open_position(signal, quotation_to_decimal(candle.close))
 
         logger.info(f"Tests completed")
 
