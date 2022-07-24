@@ -5,7 +5,7 @@ from logging.handlers import RotatingFileHandler
 from configuration.configuration import ProgramConfiguration
 from history_tests.history_manager import HistoryTestsManager
 from invest_api.services.client_service import ClientService
-from trade_system.commissions import CommissionCalculator
+from trade_system.commissions.commissions import CommissionCalculator
 from trade_system.strategies.strategy_factory import StrategyFactory
 
 # the configuration file name
