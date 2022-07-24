@@ -3,8 +3,8 @@ import os
 from logging.handlers import RotatingFileHandler
 
 from configuration.configuration import ProgramConfiguration
+from data_provider.tinkoff_historic import TinkoffHistoric
 from history_tests.history_manager import HistoryTestsManager
-from invest_api.services.client_service import ClientService
 from trade_system.commissions.commissions import CommissionEveryOrderCalculator
 from trade_system.strategies.strategy_factory import StrategyFactory
 
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     except Exception as ex:
         logger.critical("Load configuration error: %s", repr(ex))
     else:
-        client_service = ClientService(config.tinkoff_token, config.tinkoff_app_name)
+        data_provider = TinkoffHistoric(config.tinkoff_token, config.tinkoff_app_name)
         commission_calculator = CommissionEveryOrderCalculator(config.commission_settings)
 
         test_strategy = StrategyFactory.new_factory(
@@ -45,6 +45,6 @@ if __name__ == "__main__":
             config.test_strategy_settings
         )
 
-        HistoryTestsManager(client_service, commission_calculator).start(test_strategy)
+        HistoryTestsManager(data_provider, commission_calculator).start(test_strategy)
 
-    logger.info("Backtesting has ended")
+    logger.info("Backtesting has been ended")

@@ -1,8 +1,8 @@
 import logging
 
-from tinkoff.invest import HistoricCandle
 from tinkoff.invest.utils import quotation_to_decimal
 
+from data_provider.base_data_provider import IDataProvider
 from trade_system.strategies.base_strategy import IStrategy
 from history_tests.test_results import TestResults
 
@@ -20,13 +20,14 @@ class StrategyTester:
 
     def test(
             self,
-            candles: list[HistoricCandle]
+            data_provider: IDataProvider,
+            from_days: int
     ) -> TestResults:
-        logger.info(f"Start test: {self.__strategy}, candles count: {len(candles)}")
+        logger.info(f"Start test: {self.__strategy}, figi: {self.__strategy.settings.figi}, from_days: {from_days}")
 
         test_result = TestResults()
 
-        for candle in candles:
+        for candle in data_provider.provide(self.__strategy.settings.figi, from_days):
             # Check price from candle for take or stop price level
             if test_result.current_position:
                 high = quotation_to_decimal(candle.high)

@@ -1,11 +1,9 @@
 import logging
 from decimal import Decimal
 
-from tinkoff.invest import CandleInterval
-
+from data_provider.base_data_provider import IDataProvider
 from history_tests.strategy_tester import StrategyTester
 from history_tests.test_results import TestResults
-from invest_api.services.client_service import ClientService
 from trade_system.commissions.base_commission import ICommissionCalculator
 from trade_system.signal import SignalType
 from trade_system.strategies.base_strategy import IStrategy
@@ -20,8 +18,8 @@ class HistoryTestsManager:
     The manager for testing strategy on historical candles
     """
 
-    def __init__(self, client_service: ClientService, commission_calculator: ICommissionCalculator) -> None:
-        self.__client_service = client_service
+    def __init__(self, data_provider: IDataProvider, commission_calculator: ICommissionCalculator) -> None:
+        self.__data_provider = data_provider
         self.__commission_calculator = commission_calculator
 
     def start(
@@ -34,23 +32,18 @@ class HistoryTestsManager:
         """
         logger.info(f"Start strategy tests: {strategy}")
 
-        # Download candles for tests
         try:
-            candles = self.__client_service.download_historic_candle(
-                strategy.settings.figi,
-                from_days,
-                CandleInterval.CANDLE_INTERVAL_1_MIN
+            test_results = StrategyTester(strategy).test(
+                self.__data_provider,
+                from_days
             )
+
+            # Show all results to log file
+            self.__log_test_results(test_results)
         except Exception as ex:
-            logger.error(f"Download candles for tests exception: {repr(ex)}")
-            return
-
-        test_results = StrategyTester(strategy).test(candles)
-
-        # Show all results to log file
-        self.__log_test_results(test_results)
-
-        logger.info("End strategy tests")
+            logger.error(f"Testing error: {repr(ex)}")
+        else:
+            logger.info("End strategy tests")
 
     def __log_test_results(self, test_results: TestResults) -> None:
         """
