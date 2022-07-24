@@ -1,8 +1,53 @@
+import enum
 from decimal import Decimal
 
-from trade_system.signal import TestPosition, Signal
+from trade_system.signal import Signal
 
-__all__ = ("TestResults")
+__all__ = ("TestResults", "TestPosition", "PositionStatus")
+
+
+@enum.unique
+class PositionStatus(enum.IntEnum):
+    OPEN = 0
+    PROFIT = 1
+    LOSS = 2
+
+
+class TestPosition:
+    def __init__(self, signal: Signal, open_level: Decimal) -> None:
+        self.__signal = signal
+        self.__status = PositionStatus.OPEN
+        self.__open_level = open_level
+        self.__close_level = Decimal(0)
+
+    @property
+    def signal(self) -> Signal:
+        return self.__signal
+
+    @property
+    def open_level(self) -> Decimal:
+        return self.__open_level
+
+    @property
+    def close_level(self) -> Decimal:
+        return self.__close_level
+
+    def stop_loss_executed(self, close_level: Decimal) -> None:
+        self.__status = PositionStatus.LOSS
+        self.__close_level = close_level
+
+    def take_profit_executed(self, close_level: Decimal) -> None:
+        self.__status = PositionStatus.PROFIT
+        self.__close_level = close_level
+
+    def is_opened(self) -> bool:
+        return self.__status == PositionStatus.OPEN
+
+    def is_take_profit(self) -> bool:
+        return self.__status == PositionStatus.PROFIT
+
+    def is_stop_loss(self) -> bool:
+        return self.__status == PositionStatus.LOSS
 
 
 class TestResults:
@@ -56,3 +101,5 @@ class TestResults:
     def __execute_current_position(self) -> None:
         self.__executed_orders.append(self.__current_position)
         self.__current_position = None
+
+
