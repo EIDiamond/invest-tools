@@ -6,7 +6,7 @@ from tinkoff.invest import CandleInterval
 from history_tests.strategy_tester import StrategyTester
 from history_tests.test_results import TestResults
 from invest_api.services.client_service import ClientService
-from trade_system.commissions import CommissionCalculator
+from trade_system.commissions.base_commission import ICommissionCalculator
 from trade_system.signal import SignalType
 from trade_system.strategies.base_strategy import IStrategy
 
@@ -20,7 +20,7 @@ class HistoryTestsManager:
     The manager for testing strategy on historical candles
     """
 
-    def __init__(self, client_service: ClientService, commission_calculator: CommissionCalculator) -> None:
+    def __init__(self, client_service: ClientService, commission_calculator: ICommissionCalculator) -> None:
         self.__client_service = client_service
         self.__commission_calculator = commission_calculator
 
