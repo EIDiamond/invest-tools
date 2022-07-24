@@ -2,7 +2,7 @@ import logging
 from decimal import Decimal
 
 from data_provider.base_data_provider import IDataProvider
-from history_tests.trading_emulator.strategy_tester import StrategyTester
+from history_tests.trading_emulator.stop_take_emulator import StrategyTester
 from history_tests.test_results import TestResults
 from trade_system.commissions.base_commission import ICommissionCalculator
 from trade_system.signal import SignalType
