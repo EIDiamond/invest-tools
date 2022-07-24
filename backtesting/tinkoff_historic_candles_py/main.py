@@ -37,14 +37,18 @@ if __name__ == "__main__":
     except Exception as ex:
         logger.critical("Load configuration error: %s", repr(ex))
     else:
+        # create data provider
         data_provider = TinkoffHistoric(config.tinkoff_token, config.tinkoff_app_name)
+        # create calculator of commissions
         commission_calculator = CommissionEveryOrderCalculator(config.commission_settings)
 
+        # create a strategy for tests
         test_strategy = StrategyFactory.new_factory(
             config.test_strategy_settings.name,
             config.test_strategy_settings
         )
 
+        # start testing
         HistoryTestsManager(data_provider, commission_calculator).start(test_strategy)
 
     logger.info("Backtesting has been ended")

@@ -6,6 +6,13 @@ __all__ = ("TestResults")
 
 
 class TestResults:
+    """Class keeps information about trading result (emulation):
+    - Current open position
+    - All positions for history
+    - Signal for position
+    - Open and close price level
+    """
+
     def __init__(self) -> None:
         self.__current_position: TestPosition = None
         self.__executed_orders: list[TestPosition] = []

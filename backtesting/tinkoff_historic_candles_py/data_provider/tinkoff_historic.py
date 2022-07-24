@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class TinkoffHistoric(IDataProvider):
+    """Data provider from tinkoff historic candles (api download_historic_candle)"""
     def __init__(self, token: str, app_name: str) -> None:
         self.__client_service = ClientService(token, app_name)
 

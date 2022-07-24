@@ -9,6 +9,7 @@ __all__ = ("IStrategy")
 
 
 class IStrategy(abc.ABC):
+    """Interface for strategy classes """
     @property
     @abc.abstractmethod
     def settings(self) -> StrategySettings:

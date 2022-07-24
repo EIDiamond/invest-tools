@@ -7,6 +7,7 @@ __all__ = ("CommissionEveryOrderCalculator")
 
 
 class CommissionEveryOrderCalculator(ICommissionCalculator):
+    """Commission calculator for Tinkoff broker and INVESTOR tariff"""
     def __init__(self, settings: CommissionSettings) -> None:
         self.__settings = settings
 
