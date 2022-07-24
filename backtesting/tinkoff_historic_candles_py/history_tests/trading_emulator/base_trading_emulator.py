@@ -1,8 +1,13 @@
 import abc
 
-__all__ = ("IStrategyTester")
+from data_provider.base_data_provider import IDataProvider
+from history_tests.test_results import TestResults
+
+__all__ = ("ITradingEmulator")
 
 
-class IStrategyTester(abc.ABC):
-    """Interface for strategy tester classes to emulate different style of trading"""
-    pass
+class ITradingEmulator(abc.ABC):
+    """Interface to emulate different style of trading"""
+    @abc.abstractmethod
+    def emulate_trading(self, data_provider: IDataProvider, from_days: int) -> TestResults:
+        pass

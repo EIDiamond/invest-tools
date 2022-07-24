@@ -5,6 +5,7 @@ from logging.handlers import RotatingFileHandler
 from configuration.configuration import ProgramConfiguration
 from data_provider.tinkoff_historic import TinkoffHistoric
 from history_tests.history_manager import HistoryTestsManager
+from history_tests.trading_emulator.stop_take_emulator import StopTakeEmulator
 from trade_system.commissions.commissions import CommissionEveryOrderCalculator
 from trade_system.strategies.strategy_factory import StrategyFactory
 
@@ -41,14 +42,15 @@ if __name__ == "__main__":
         data_provider = TinkoffHistoric(config.tinkoff_token, config.tinkoff_app_name)
         # create calculator of commissions
         commission_calculator = CommissionEveryOrderCalculator(config.commission_settings)
-
         # create a strategy for tests
         test_strategy = StrategyFactory.new_factory(
             config.test_strategy_settings.name,
             config.test_strategy_settings
         )
+        # create trading emulator
+        trading_emulator = StopTakeEmulator(test_strategy)
 
         # start testing
-        HistoryTestsManager(data_provider, commission_calculator).start(test_strategy)
+        HistoryTestsManager(data_provider, commission_calculator).start(trading_emulator)
 
     logger.info("Backtesting has been ended")

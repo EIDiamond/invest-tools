@@ -2,11 +2,10 @@ import logging
 from decimal import Decimal
 
 from data_provider.base_data_provider import IDataProvider
-from history_tests.trading_emulator.stop_take_emulator import StrategyTester
+from history_tests.trading_emulator.base_trading_emulator import ITradingEmulator
 from history_tests.test_results import TestResults
 from trade_system.commissions.base_commission import ICommissionCalculator
 from trade_system.signal import SignalType
-from trade_system.strategies.base_strategy import IStrategy
 
 __all__ = ("HistoryTestsManager")
 
@@ -24,16 +23,16 @@ class HistoryTestsManager:
 
     def start(
             self,
-            strategy: IStrategy,
+            trading_emulator: ITradingEmulator,
             from_days: int = 7
     ) -> None:
         """
         Main entry point to start testing
         """
-        logger.info(f"Start strategy tests: {strategy}")
+        logger.info(f"Start strategy tests")
 
         try:
-            test_results = StrategyTester(strategy).test(
+            test_results = trading_emulator.emulate_trading(
                 self.__data_provider,
                 from_days
             )
@@ -76,6 +75,6 @@ class HistoryTestsManager:
                 # short profit if open > close
                 profit = profit + test_order.open_level - test_order.close_level
 
-        logger.info(f"Trade order profit: {profit}")
+        logger.info(f"Total trade profit: {profit}")
         logger.info(f"Total commission: {total_commission}")
-        logger.info(f"Trade summary: {profit - total_commission}")
+        logger.info(f"Total trade summary: {profit - total_commission}")

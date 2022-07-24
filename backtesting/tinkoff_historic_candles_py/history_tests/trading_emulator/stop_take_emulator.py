@@ -3,22 +3,23 @@ import logging
 from tinkoff.invest.utils import quotation_to_decimal
 
 from data_provider.base_data_provider import IDataProvider
+from history_tests.trading_emulator.base_trading_emulator import ITradingEmulator
 from trade_system.strategies.base_strategy import IStrategy
 from history_tests.test_results import TestResults
 
-__all__ = ("StrategyTester")
+__all__ = ("StopTakeEmulator")
 
 logger = logging.getLogger(__name__)
 
 
-class StrategyTester:
+class StopTakeEmulator(ITradingEmulator):
     """
-    Class encapsulate test logic on historical candles
+    Class encapsulate trading based on stop and take price levels from strategy signals
     """
     def __init__(self, strategy: IStrategy) -> None:
         self.__strategy = strategy
 
-    def test(
+    def emulate_trading(
             self,
             data_provider: IDataProvider,
             from_days: int
